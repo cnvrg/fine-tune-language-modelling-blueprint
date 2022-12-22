@@ -1,0 +1,10 @@
+numpy
+pandas
+sklearn
+nltk
+gensim
+matplotlib
+transformers
+torch
+nvidia-ml-py3
+datasets

@@ -1,0 +1,58 @@
+title: FT Compare Language # required on creation, a slug will be generated from the title? -> inference-library
+version: 1.0.18 # required
+description: "Compare different models and choose the best-performing one" # optional
+icon: python # optional
+
+# Optional properties for crediting authors
+author: "cnvrg"
+author_email: "libhub@cnvrg.io"
+
+# At least one tag [inference, training, data] must be present
+tags:
+  - training
+  - Predictive Maintenance
+
+# Available only for training (exec tasks) libraries only
+command: python3 compare.py
+
+# These will replace the "compute" argument, values must be >= 0:
+# We need to add requirement for distributed pods
+requirements:
+  cpu: 3.5
+  memory: 7.5
+  gpu: 0
+  hpu: 0
+
+# This will replace the "docker_images" argument (?) need to work in cnvrg as well
+image: python:3.8
+
+# This will replace "env_setup", currently only python 3 is supported.
+language: python3
+
+arguments:
+  # Training arguments will have type and value, valid types are [discrete, float, integer, categorical]
+  # Empty value will mark the argument as 'required', adding a default value will place it in the flow.
+  - key: model_name_1
+    type: 'categorical'
+    values:
+    - 'bert-base-uncased'
+  - key: model_path_1
+    type: 'categorical'
+    values:
+    - '/input/dev_ft_bert/story_generator_checkpoint_'
+  - key: model_name_2
+    type: 'categorical'
+    values:
+    - 'distilgpt2'
+  - key: model_path_2
+    type: 'categorical'
+    values:
+    - '/input/dev_ft_distilgpt2/story_generator_checkpoint_'
+  - key: model_name_3
+    type: 'categorical'
+    values:
+    - 'gpt2'
+  - key: model_path_3
+    type: 'categorical'
+    values:
+    - '/input/dev_ft_gpt2/story_generator_checkpoint_'
