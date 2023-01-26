@@ -347,8 +347,10 @@ def main():
                 for key in sorted(result.keys()):
                     logger.info("  %s = %s", key, str(result[key]))
                     writer.write("%s = %s\n" % (key, str(result[key])))
+                    print("%s = %s\n" % (key, str(result[key])))
 
         results.update(result)
+        
 
     if device == "cuda:0":
         print("====Ending GPU Utilization===")
