@@ -15,6 +15,7 @@ from torch.nn import functional as F
 import math
 from dataclasses import dataclass, field
 from typing import Optional
+import yaml
 
 from transformers import (
     CONFIG_MAPPING,
