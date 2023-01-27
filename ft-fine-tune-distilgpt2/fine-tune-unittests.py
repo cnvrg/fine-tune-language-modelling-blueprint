@@ -3,54 +3,45 @@ import unittest
 from finetune import DataTrainingArguments, get_dataset
 import os
 import pathlib as pl
+import sys
 import transformers
 import shutil
 import subprocess
 
-from transformers import (
-    AutoTokenizer,
-)
+from transformers import AutoTokenizer
+
+scripts_dir = pl.Path(__file__).parent.resolve()
+sys.path.append(str(scripts_dir))
 
 print(os.getcwd())
 
 class TestFT(unittest.TestCase):   
-    def assertFileExist(self, path):
-        if not pl.Path(path):
-            raise ValueError(
-                "Cannot do evaluation without an evaluation data file. Either supply a file to --eval_data_file "
-                "or remove the --do_eval argument."
-            )
-    def assertDirExist(self, path):
-        if (
-            os.path.exists(path)
-        ):
-            raise ValueError(
-                f"Output directory ({path}) already exists and is not empty. Use --overwrite_output_dir to overcome."
-            )
-
     # Test 1
     def test_data_paths(self):
         """Checks if input file existing"""
-        file = pl.Path("./6_genre_clean_training_data_small.txt")
+        file = pl.Path(os.path.join(scripts_dir, '6_genre_clean_training_data_small.txt'))
         self.assertTrue(file.resolve().is_file())
 
     # Test 2
     def test_data_paths(self):
         """Checks if input file existing"""
-        file = pl.Path("./6_genre_eval_data_small.txt")
+        file = pl.Path(os.path.join(scripts_dir, '6_genre_eval_data_small.txt'))
         self.assertTrue(file.resolve().is_file())
 
     # Test 3
     def test_eval_exit(self):
         """Checks if Eval file provided"""
-        file = pl.Path("./6_genre_eval_data_small.txt")
-        self.assertFileExist(file)
+        """Cannot do evaluation without an evaluation data file. Either supply a file to --eval_data_file """
+        """or remove the --do_eval argument."""
+        file = pl.Path(os.path.join(scripts_dir, '6_genre_eval_data_small.txt'))
+        self.assertTrue(pl.Path(file))
 
     # Test 4
     def test_outputdir_exist(self):
-        """Checks if output_dir existing"""
-        file = pl.Path("./story_generator_checkpoint_" + "distilgpt2")
-        self.assertDirExist(file)
+        """Checks if output_dir not existing"""
+        """If output directory ({path}) already exists and is not empty. Use --overwrite_output_dir to overcome."""
+        file = pl.Path(os.path.join(scripts_dir, 'story_generator_checkpoint_' + 'distilgpt2'))
+        self.assertFalse(os.path.exists(file))
 
     # Test 5
     def test_return_type(self):
@@ -75,8 +66,12 @@ class TestFT(unittest.TestCase):
         model_name = "distilgpt2"
         output_model_path = "story_generator_checkpoint_"
         distilgpt2_target = 90
-        
-        cmd = "python -u ./finetune.py --model_name distilgpt2 "
+        finetune_path = os.path.join(scripts_dir, 'finetune.py')
+
+        cmd = "python -u " + finetune_path + " --model_name distilgpt2 " \
+              + " --input_filename_train 6_genre_clean_training_data_small.txt " \
+              + " --input_filename_test 6_genre_eval_data_small.txt "
+
         try:
             result = subprocess.check_output(cmd, shell=True)
             result = result.decode('utf-8')
@@ -84,7 +79,7 @@ class TestFT(unittest.TestCase):
             print(f' returned error: {e.returncode}, output: {e.output.decode()}')
             return e.returncode
         perplexity = result.split("=")[1]
-        message = "Perplexity is not less that target value."
+        message = "Perplexity is not less than target value."
         self.assertLess(float(perplexity), distilgpt2_target, message)
         if output_model_path+model_name:
             shutil.rmtree(output_model_path+model_name, ignore_errors=True)  
