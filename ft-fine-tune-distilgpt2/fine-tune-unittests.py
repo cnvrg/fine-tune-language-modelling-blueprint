@@ -19,12 +19,15 @@ class TestFT(unittest.TestCase):
     # Test 1
     def test_data_paths(self):
         """Checks if input file existing"""
+        scripts_dir = pl.Path(__file__).parent.resolve()
+        sys.path.append(str(scripts_dir))
         file = pl.Path(os.path.join(scripts_dir, '6_genre_clean_training_data_small.txt'))
         self.assertTrue(file.resolve().is_file())
 
     # Test 2
     def test_data_paths(self):
         """Checks if input file existing"""
+        scripts_dir = pl.Path(__file__).parent.resolve()
         file = pl.Path(os.path.join(scripts_dir, '6_genre_eval_data_small.txt'))
         self.assertTrue(file.resolve().is_file())
 
@@ -33,6 +36,7 @@ class TestFT(unittest.TestCase):
         """Checks if Eval file provided"""
         """Cannot do evaluation without an evaluation data file. Either supply a file to --eval_data_file """
         """or remove the --do_eval argument."""
+        scripts_dir = pl.Path(__file__).parent.resolve()
         file = pl.Path(os.path.join(scripts_dir, '6_genre_eval_data_small.txt'))
         self.assertTrue(pl.Path(file))
 
@@ -40,6 +44,7 @@ class TestFT(unittest.TestCase):
     def test_outputdir_exist(self):
         """Checks if output_dir not existing"""
         """If output directory ({path}) already exists and is not empty. Use --overwrite_output_dir to overcome."""
+        scripts_dir = pl.Path(__file__).parent.resolve()
         file = pl.Path(os.path.join(scripts_dir, 'story_generator_checkpoint_' + 'distilgpt2'))
         self.assertFalse(os.path.exists(file))
 
@@ -63,6 +68,7 @@ class TestFT(unittest.TestCase):
     # Test 6 Modified
     def test_return_metrics(self):
         """Checks if the metrics peplexity meet target value."""
+        scripts_dir = pl.Path(__file__).parent.resolve()
         model_name = "distilgpt2"
         output_model_path = "story_generator_checkpoint_"
         distilgpt2_target = 90
@@ -70,7 +76,12 @@ class TestFT(unittest.TestCase):
 
         cmd = "python -u " + finetune_path + " --model_name distilgpt2 " \
               + " --input_filename_train 6_genre_clean_training_data_small.txt " \
-              + " --input_filename_test 6_genre_eval_data_small.txt "
+              + " --input_filename_test 6_genre_eval_data_small.txt " \
+              + " --output_model_path story_generator_checkpoint_ " \
+              + " --num_train_epochs 1 " \
+              + " --logging_steps 500 " \
+              + " --save_steps 1000 " \
+              + " --max_length 256 "
 
         try:
             result = subprocess.check_output(cmd, shell=True)
