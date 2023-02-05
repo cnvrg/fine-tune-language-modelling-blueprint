@@ -1,0 +1,358 @@
+---
+title: Chatbot Language Train # Required on creation, replaces the "flow" parameter
+version: 1.0.5 # Required
+description: Finetune a BERT/gpt2/distilgpt2 model for use in chatbot language modelling
+long_description: This blueprint allows you to fine tune a pre-trained BERT/gpt2/distilgpt2 model and deploy that can do text generation based on your data
+# Optional properties for crediting authors
+author: "cnvrg"
+author_email: "info@cnvrg.io"
+
+# At least one tag [inference, training, data] must be present
+tags:
+  - training
+  - nlp
+
+# List of tasks (libraries)
+tasks:
+  - title: FT S3 Connector
+    top: 500
+    left: 0
+
+    # Type must be according to the flow task conventions (data, exec, deploy)
+    type: exec
+
+    # The library data
+    library: ft-s3-connector
+    library_version: 1.0.18
+
+    # The flattened library parameters (in this case we have training library)
+    command: python3 ft-s3-connector.py
+
+    requirements:
+      cpu: 3.5
+      memory: 8
+      gpu: 0
+      hpu: 0
+
+    image: cnvrg:v5.0
+    language: python3
+
+    # The "arguments" property changes to "params", rest remains the same.
+    # Params in the blueprint yaml can be used to override the arguments in the library.
+    params:
+      - key: endpoint
+        type: 'categorical'
+        values:
+          - 'http://s3.amazonaws.com download'
+      - key: bucketname
+        type: 'categorical'
+        values:
+          - 'libhub-readme'
+      - key: localdir
+        type: 'categorical'
+        values:
+          - '/cnvrg'
+      - key: prefix
+        type: 'categorical'
+        values:
+          - 'chatbot_language_modelling/'
+  - title: FT Bert
+    top: 200
+    left: 300
+
+    # Type must be according to the flow task conventions (data, exec, deploy)
+    type: exec
+
+    # The library data
+    library: ft-bert
+    library_version: 1.0.18
+
+    # The flattened library parameters (in this case we have training library)
+    command: python3 fine-tune.py
+
+    requirements:
+      cpu: 3.5
+      memory: 8
+      gpu: 1
+      hpu: 0
+
+    image: python:3.8
+    language: python3
+
+    # The "arguments" property changes to "params", rest remains the same.
+    # Params in the blueprint yaml can be used to override the arguments in the library.
+    params:
+      - key: input_filename_train
+        type: 'categorical'
+        values:
+        - '/input/ft_s3_connector/chatbot_language_modelling/6_genre_clean_training_data_small.txt'
+      - key: input_filename_test
+        type: 'categorical'
+        values:
+        - '/input/ft_s3_connector/chatbot_language_modelling/6_genre_eval_data_small.txt'
+      - key: model_name
+        type: 'categorical'
+        values:
+          - 'bert-base-uncased'
+      - key: output_model_path
+        type: 'categorical'
+        values:
+          - '/cnvrg/story_generator_checkpoint_'
+      - key: num_train_epochs
+        type: 'discrete'
+        values:
+          - '3'
+      - key: logging_steps
+        type: 'discrete'
+        values:
+          - '500'
+      - key: save_steps
+        type: 'discrete'
+        values:
+          - '1000'
+      - key: max_length
+        type: 'discrete'
+        values:
+          - '256'
+
+  - title: FT Distilgpt2
+    top: 300
+    left: 300
+
+    # Type must be according to the flow task conventions (data, exec, deploy)
+    type: exec
+
+    # The library data
+    library: ft-distilgpt2
+    library_version: 1.0.18
+
+    # The flattened library parameters (in this case we have training library)
+    command: python3 fine-tune.py
+
+    requirements:
+      cpu: 3.5
+      memory: 8
+      gpu: 1
+      hpu: 0
+
+    image: python:3.8
+    language: python3
+
+    # The "arguments" property changes to "params", rest remains the same.
+    # Params in the blueprint yaml can be used to override the arguments in the library.
+    params:
+      - key: input_filename_train
+        type: 'categorical'
+        values:
+        - '/input/ft_s3_connector/chatbot_language_modelling/6_genre_clean_training_data_small.txt'
+      - key: input_filename_test
+        type: 'categorical'
+        values:
+        - '/input/ft_s3_connector/chatbot_language_modelling/6_genre_eval_data_small.txt'
+      - key: model_name
+        type: 'categorical'
+        values:
+          - 'distilgpt2'
+      - key: output_model_path
+        type: 'categorical'
+        values:
+          - '/cnvrg/story_generator_checkpoint_'
+      - key: num_train_epochs
+        type: 'discrete'
+        values:
+          - '3'
+      - key: logging_steps
+        type: 'discrete'
+        values:
+          - '500'
+      - key: save_steps
+        type: 'discrete'
+        values:
+          - '1000'
+      - key: max_length
+        type: 'discrete'
+        values:
+          - '256'
+  - title: FT Gpt2
+    top: 400
+    left: 300
+
+    # Type must be according to the flow task conventions (data, exec, deploy)
+    type: exec
+
+    # The library data
+    library: ft-gpt2
+    library_version: 1.0.18
+
+    # The flattened library parameters (in this case we have training library)
+    command: python3 fine-tune.py
+
+    requirements:
+      cpu: 3.5
+      memory: 8
+      gpu: 1
+      hpu: 0
+
+    image: python:3.8
+    language: python3
+
+    # The "arguments" property changes to "params", rest remains the same.
+    # Params in the blueprint yaml can be used to override the arguments in the library.
+    params:
+      - key: input_filename_train
+        type: 'categorical'
+        values:
+        - '/input/ft_s3_connector/chatbot_language_modelling/6_genre_clean_training_data_small.txt'
+      - key: input_filename_test
+        type: 'categorical'
+        values:
+        - '/input/ft_s3_connector/chatbot_language_modelling/6_genre_eval_data_small.txt'
+      - key: model_name
+        type: 'categorical'
+        values:
+          - 'gpt2'
+      - key: output_model_path
+        type: 'categorical'
+        values:
+          - '/cnvrg/story_generator_checkpoint_'
+      - key: num_train_epochs
+        type: 'discrete'
+        values:
+          - '3'
+      - key: logging_steps
+        type: 'discrete'
+        values:
+          - '500'
+      - key: save_steps
+        type: 'discrete'
+        values:
+          - '1000'
+      - key: max_length
+        type: 'discrete'
+        values:
+          - '256'
+  
+  - title: FT Compare Language
+    top: 300
+    left: 600
+
+    # Type must be according to the flow task conventions (data, exec, deploy)
+    type: exec
+
+    # The library data
+    library: ft-compare-language
+    library_version: 1.0.18
+
+    # The flattened library parameters (in this case we have training library)
+    command: python compare.py
+
+    requirements:
+      cpu: 3.5
+      memory: 7.5
+      gpu: 0
+      hpu: 0
+
+    image: python:3.8
+    language: python3
+
+    # The "arguments" property changes to "params", rest remains the same.
+    # Params in the blueprint yaml can be used to override the arguments in the library.
+    params: 
+      - key: model_name_1
+        type: 'categorical'
+        values:
+        - 'bert-base-uncased'
+      - key: model_path_1
+        type: 'categorical'
+        values:
+        - '/input/ft_bert/story_generator_checkpoint_'
+      - key: model_name_2
+        type: 'categorical'
+        values:
+        - 'distilgpt2'
+      - key: model_path_2
+        type: 'categorical'
+        values:
+        - '/input/ft_distilgpt2/story_generator_checkpoint_'
+      - key: model_name_3
+        type: 'categorical'
+        values:
+        - 'gpt2'
+      - key: model_path_3
+        type: 'categorical'
+        values:
+        - '/input/ft_gpt2/story_generator_checkpoint_'
+
+  - title: FT Batch Language
+    top: 500
+    left: 900
+
+    # Type must be according to the flow task conventions (data, exec, deploy)
+    type: exec
+
+    # The library data
+    library: ft-batch-language
+    library_version: 1.0.18
+
+    # The flattened library parameters (in this case we have inference library)
+    command: python3 inference-batch.py
+
+    requirements:
+      cpu: 3.5
+      memory: 8
+      gpu: 0
+      hpu: 0
+
+    image: python:3.8
+    language: python3
+    accept_files: false
+
+    # The "arguments" property changes to "params", rest remains the same.
+    # Params in the blueprint yaml can be used to override the arguments in the library.
+    params:
+      - key: input_filename
+        type: 'categorical'
+        values:
+        - '/input/ft_s3_connector/chatbot_language_modelling/6_genre_clean_inference_data.txt'
+      - key: model_name
+        type: 'categorical'
+        values:
+        - 'None'
+      - key: model_path
+        type: 'categorical'
+        values:
+        - './story_generator_checkpoint_'
+      - key: best_model_path
+        type: 'categorical'
+        values:
+        - '/input/ft_compare_language/story_generator_checkpoint_*'
+      - key: result_path
+        type: 'categorical'
+        values:
+          - '/cnvrg'
+      - key: text_column
+        type: 'categorical'
+        values:
+          - 'text'
+      - key: length_story
+        type: 'discrete'
+        values:
+          - '100'
+
+relations:
+  - from: FT S3 Connector
+    to: FT Bert
+  - from: FT S3 Connector
+    to: FT Distilgpt2
+  - from: FT S3 Connector
+    to: FT Gpt2
+  - from: FT Bert
+    to: FT Compare Language
+  - from: FT Distilgpt2
+    to: FT Compare Language
+  - from: FT GPT2
+    to: FT Compare Language
+  - from: FT Compare Language
+    to: FT Batch Language
+  - from: FT S3 Connector
+    to: FT Batch Language
